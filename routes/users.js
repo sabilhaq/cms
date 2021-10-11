@@ -1,55 +1,103 @@
 var express = require("express");
 var router = express.Router();
 var User = require("../models/user");
+const jwt = require("jsonwebtoken");
+const accessTokenSecret = "youraccesstokensecret";
 
-/* GET users listing. */
-router.get("/", async function (req, res, next) {
+router.post("/register", async function (req, res, next) {
   try {
-    const users = await User.find({}).populate("todos");
-    res.json(users);
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
+    if (req.body.retypepassword != req.body.password) {
+      res.status(500).json({ err: "retype password not match" });
+    }
 
-router.post("/", async function (req, res, next) {
-  try {
+    const accessToken = jwt.sign({ email: req.body.email }, accessTokenSecret);
+    req.body.token = accessToken
     const user = await User.create(req.body);
-    res.json(user);
+
+    const response = {
+      data: {
+        email: user.email,
+      },
+      token: user.token,
+    }
+    res.json(response);
   } catch (err) {
     res.status(500).json(err);
   }
 });
 
-router.put("/:id", async function (req, res, next) {
+router.post("/login", async function (req, res, next) {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    res.json(user);
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
+    let user = await User.findOne({ email: req.body.email });
+    if (!user.verify(req.body.password)) {
+      return res.status(500).json({ err: "invalid password" });
+    }
 
-router.delete("/:id", async function (req, res, next) {
-  try {
-    const user = await User.findByIdAndDelete(req.params.id, {
-      new: true,
-    });
-    res.json(user);
+    if (!user.token) {
+      const refreshToken = jwt.sign({ email: req.body.email }, accessTokenSecret);
+      const filter = { email: req.body.email }
+      const update = { token: refreshToken }
+
+      user = await User.findOneAndUpdate(filter, update, {
+        new: true,
+      });
+    }
+
+    const userVerified = jwt.verify(user.token, accessTokenSecret);
+    if (!userVerified) {
+      const refreshToken = jwt.sign({ email: user.email }, accessTokenSecret);
+      const filter = { email: user.email }
+      const update = { token: refreshToken }
+
+      user = await User.findOneAndUpdate(filter, update, {
+        new: true,
+      });
+    }
+
+    const response = {
+      data: {
+        email: user.email,
+      },
+      token: user.token,
+    }
+    res.json(response);
   } catch (err) {
-    res.status(500).json(err);
+    res.status(401).json(err);
   }
 });
 
 router.post("/check", async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.body.email });
-    res.json(user.verify(req.body.password));
+    jwt.verify(req.body.token, accessTokenSecret, (err, user) => {
+      if (err || !user) {
+        throw err;
+      }
+
+      res.json({ valid: true });
+    });
   } catch (err) {
     res.status(500).json(err);
   }
 });
+
+router.get("/destroy", async (req, res) => {
+  req.body.token = null
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ message: "invalid token" });
+    }
+    const reqToken = authHeader.split(" ")[1];
+    const filter = { token: reqToken }
+    const update = { token: null }
+
+    const user = await User.findOneAndUpdate(filter, update, {
+      new: true,
+    });
+    res.json({ logout: true });
+  } catch (err) {
+    res.status(500).json(err);
+  }
+})
 
 module.exports = router;

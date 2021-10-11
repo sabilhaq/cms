@@ -7,7 +7,7 @@ const userSchema = Schema(
   {
     email: String,
     password: String,
-    todos: [{ type: Schema.Types.ObjectId, ref: "Todo" }],
+    token: String,
   },
   {
     timestamps: true,
