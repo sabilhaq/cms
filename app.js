@@ -7,12 +7,13 @@ const mongoose = require("mongoose");
 main().catch((err) => console.log(err));
 
 async function main() {
-  await mongoose.connect("mongodb://localhost:27017/cobaodmdb");
+  await mongoose.connect("mongodb://localhost:27017/cmsdb");
 }
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var todosRouter = require("./routes/todos");
+var dataRouter = require("./routes/data");
 
 var app = express();
 
@@ -23,7 +24,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
+app.use("/api/users", usersRouter);
+app.use("/api/data", dataRouter);
 app.use("/todos", todosRouter);
 
 module.exports = app;
