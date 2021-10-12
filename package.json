@@ -1,11 +1,11 @@
 {
-  "name": "cobaodm",
+  "name": "sabilcms",
   "version": "0.0.0",
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
     "dev": "nodemon ./bin/www",
-    "test": "mocha"
+    "test": "mocha --timeout 10000"
   },
   "dependencies": {
     "bcrypt": "^5.0.1",
@@ -15,11 +15,13 @@
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
     "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.1",
     "mongoose": "^6.0.8",
     "morgan": "~1.9.1"
   },
   "devDependencies": {
     "chai": "^4.3.4",
+    "chai-http": "^4.3.0",
     "mocha": "^9.1.2",
     "nodemon": "^2.0.13",
     "supertest": "^6.1.6"
