@@ -11,7 +11,7 @@ router.get("/", async function (req, res, next) {
   }
 });
 
-router.get("/search", async function (req, res, next) {
+router.post("/search", async function (req, res, next) {
   try {
     const data = await Data.find(req.body).select("-__v");
     res.json(data);
@@ -23,12 +23,13 @@ router.get("/search", async function (req, res, next) {
 router.post("/", async function (req, res, next) {
   try {
     const data = await Data.create(req.body);
+    data.letter = data.letter.slice(0, 10)
     const response = {
       success: true,
       message: "data have been added",
       data: {
         _id: data._id,
-        letter: data.letter,
+        letter: data.letter.slice(0, 10),
         frequency: data.frequency,
       },
     };
