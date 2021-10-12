@@ -15,7 +15,14 @@ const userSchema = Schema(
 );
 
 userSchema.pre("save", function (next) {
-  if (!this.modified) this.password = bcrypt.hashSync(this.password, salt);
+  this.password = bcrypt.hashSync(this.password, salt);
+  next();
+});
+
+userSchema.pre("findOneAndUpdate", function (next) {
+  if (this._update.password) {
+    this._update.password = bcrypt.hashSync(this._update.password, salt);
+  }
   next();
 });
 

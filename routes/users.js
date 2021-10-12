@@ -62,7 +62,7 @@ router.post("/login", async function (req, res, next) {
     }
     res.json(response);
   } catch (err) {
-    res.status(401).json(err);
+    res.status(500).json(err);
   }
 });
 
@@ -81,7 +81,6 @@ router.post("/check", async (req, res) => {
 });
 
 router.get("/destroy", async (req, res) => {
-  req.body.token = null
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
