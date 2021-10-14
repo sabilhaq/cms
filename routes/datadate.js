@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+var helper = require("../helpers/util")
 var Datadate = require("../models/datadate");
 var moment = require("moment");
 
@@ -16,8 +17,14 @@ router.get("/", async function (req, res, next) {
   }
 });
 
-router.post("/search", async function (req, res, next) {
+router.post("/search", helper.isLoggedIn, async function (req, res, next) {
   try {
+    if (!req.body.letter) {
+      delete req.body.letter
+    }
+    if (!req.body.frequency) {
+      delete req.body.frequency
+    }
     const datadate = await Datadate.find(req.body).select("-__v");
     const response = datadate.map((item) => {
       item._doc.letter = moment(item._doc.letter).format("YYYY-MM-DD");
@@ -29,7 +36,7 @@ router.post("/search", async function (req, res, next) {
   }
 });
 
-router.post("/", async function (req, res, next) {
+router.post("/", helper.isLoggedIn, async function (req, res, next) {
   try {
     const datadate = await Datadate.create(req.body);
     const response = {
@@ -47,7 +54,7 @@ router.post("/", async function (req, res, next) {
   }
 });
 
-router.get("/:id", async function (req, res, next) {
+router.get("/:id", helper.isLoggedIn, async function (req, res, next) {
   try {
     const datadate = await Datadate.findOne({ _id: req.params.id }).select(
       "-__v"
@@ -68,7 +75,7 @@ router.get("/:id", async function (req, res, next) {
   }
 });
 
-router.put("/:id", async function (req, res, next) {
+router.put("/:id", helper.isLoggedIn, async function (req, res, next) {
   try {
     const datadate = await Datadate.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -89,7 +96,7 @@ router.put("/:id", async function (req, res, next) {
   }
 });
 
-router.delete("/:id", async function (req, res, next) {
+router.delete("/:id", helper.isLoggedIn, async function (req, res, next) {
   try {
     const datadate = await Datadate.findByIdAndDelete(req.params.id, {
       new: true,

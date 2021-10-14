@@ -7,7 +7,7 @@ const accessTokenSecret = "youraccesstokensecret";
 router.post("/register", async function (req, res, next) {
   try {
     if (req.body.retypepassword != req.body.password) {
-      res.status(500).json({ err: "retype password not match" });
+      return res.status(500).json({ err: "retype password not match" });
     }
 
     const accessToken = jwt.sign({ email: req.body.email }, accessTokenSecret);
