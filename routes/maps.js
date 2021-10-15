@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+var helper = require("../helpers/util")
 var Map = require("../models/map");
 
 router.get("/", async function (req, res, next) {
@@ -11,7 +12,7 @@ router.get("/", async function (req, res, next) {
   }
 });
 
-router.post("/search", async function (req, res, next) {
+router.post("/search", helper.isLoggedIn, async function (req, res, next) {
   try {
     const map = await Map.find(req.body).select("-__v");
     res.json(map);
@@ -20,7 +21,7 @@ router.post("/search", async function (req, res, next) {
   }
 });
 
-router.post("/", async function (req, res, next) {
+router.post("/", helper.isLoggedIn, async function (req, res, next) {
   try {
     const map = await Map.create(req.body);
     const response = {
@@ -39,7 +40,7 @@ router.post("/", async function (req, res, next) {
   }
 });
 
-router.get("/:id", async function (req, res, next) {
+router.get("/:id", helper.isLoggedIn, async function (req, res, next) {
   try {
     const map = await Map.findOne({ _id: req.params.id }).select("-__v");
     const response = {
@@ -58,7 +59,7 @@ router.get("/:id", async function (req, res, next) {
   }
 });
 
-router.put("/:id", async function (req, res, next) {
+router.put("/:id", helper.isLoggedIn, async function (req, res, next) {
   try {
     const map = await Map.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -80,7 +81,7 @@ router.put("/:id", async function (req, res, next) {
   }
 });
 
-router.delete("/:id", async function (req, res, next) {
+router.delete("/:id", helper.isLoggedIn, async function (req, res, next) {
   try {
     const map = await Map.findByIdAndDelete(req.params.id, {
       new: true,
