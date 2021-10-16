@@ -14,6 +14,9 @@ router.get("/", async function (req, res, next) {
 
 router.post("/search", helper.isLoggedIn, async function (req, res, next) {
   try {
+    if (!req.body.title) {
+      delete req.body.title
+    }
     const map = await Map.find(req.body).select("-__v");
     res.json(map);
   } catch (err) {
